@@ -1,0 +1,28 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineRun
+metadata:
+  name: ginapp-ci
+  namespace: citest
+spec:
+  pipelineRef:
+    name: pipeline-ci
+  serviceAccountName: service-ginapp
+  resources:
+    - name: image-repo
+      resourceRef:
+        name: image-repo-docker
+    - name: app-git
+      resourceRef:
+        name: app-git
+  workspaces:
+    - name: run-env
+      persistentVolumeClaim:
+        claimName: tekton-env
+  podTemplate:
+    volumes:
+    - name: kaniko-secret
+      secret:
+        secretName: image-hub
+        items:
+        - key: .dockerconfigjson
+          path: .docker/config.json
